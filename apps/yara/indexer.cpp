@@ -114,7 +114,26 @@ struct YaraIndexer
 // ----------------------------------------------------------------------------
 // Function indexCreate
 // ----------------------------------------------------------------------------
-
+inline void
+printProgressBar(uint64_t & lastPercent, uint64_t curPerc)
+{
+    //round down to even
+    curPerc = curPerc & ~1;
+//     #pragma omp critical(stdout)
+    if ((curPerc > lastPercent) && (curPerc <= 100))
+    {
+        for (uint64_t i = lastPercent + 2; i <= curPerc; i+=2)
+        {
+            if (i == 100)
+                std::cout << "|\n" << std::flush;
+            else if (i % 10 == 0)
+                std::cout << ":" << std::flush;
+            else
+                std::cout << "." << std::flush;
+        }
+        lastPercent = curPerc;
+    }
+}
 template <typename TText, typename TSpec, typename TConfig, typename TLambda>
 inline bool
 indexCreateProgress(Index<TText, FMIndex<TSpec, TConfig> > & index,
