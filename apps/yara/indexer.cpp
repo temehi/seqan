@@ -335,7 +335,7 @@ void saveIndex(YaraIndexer<TSpec, TConfig> & me)
    //                           if (TID == 0)
                                 printProgressBar(_lastPercent, curPerc);
                             });
-        ignoreUnusedVariableWarning(it);
+        // ignoreUnusedVariableWarning(it);
     }
     catch (BadAlloc const & /* e */)
     {
