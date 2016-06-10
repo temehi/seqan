@@ -119,7 +119,8 @@ add_executable(yara_mapper    mapper.cpp
                               bits_bucket.h
                               find_extender.h
                               find_verifier.h
-                              index_fm.h)
+                              index_fm.h
+                              radix_inplace.h)
 
 # Add dependencies found by find_package (SeqAn).
 target_link_libraries (yara_indexer ${SEQAN_LIBRARIES})

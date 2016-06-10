@@ -60,6 +60,7 @@
 #include "bits_matches.h"
 #include "misc_options.h"
 #include "index_fm.h"
+#include "radix_inplace.h"
 
 using namespace seqan;
 
