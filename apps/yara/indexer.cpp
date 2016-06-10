@@ -94,6 +94,7 @@ struct Options
 // Class YaraIndexer
 // ----------------------------------------------------------------------------
 
+
 template <typename TSpec = void, typename TConfig = void>
 struct YaraIndexer
 {
@@ -108,6 +109,48 @@ struct YaraIndexer
         options(options)
     {}
 };
+
+// ----------------------------------------------------------------------------
+// Function indexCreate
+// ----------------------------------------------------------------------------
+
+template <typename TText, typename TSpec, typename TConfig, typename TLambda>
+inline bool
+indexCreateProgress(Index<TText, FMIndex<TSpec, TConfig> > & index,
+                    FibreSALF const &,
+                    TLambda const & progressCallback)
+{
+    typedef Index<TText, FMIndex<TSpec, TConfig> >               TIndex;
+    typedef typename Fibre<TIndex, FibreTempSA>::Type            TTempSA;
+    typedef typename Size<TIndex>::Type                          TSize;
+    typedef typename DefaultIndexCreator<TIndex, FibreSA>::Type  TAlgo;
+
+    TText const & text = indexText(index);
+
+    if (empty(text))
+        return false;
+
+    TTempSA tempSA;
+
+    std::cout << "Generating       0%  10%  20%  30%  40%  50%  60%  70%  80%  90%  100%\n"
+                 " (1) SuffixArray |" << std::flush;
+    // Create the full SA.
+    resize(tempSA, lengthSum(text), Exact());
+    createSuffixArray(tempSA, text, TAlgo(), progressCallback);
+
+    std::cout << " (2) FM-Index..." << std::flush;
+    // Create the LF table.
+    createLF(indexLF(index), text, tempSA);
+
+    // Set the FMIndex LF as the CompressedSA LF.
+    setFibre(indexSA(index), indexLF(index), FibreLF());
+
+    // Create the compressed SA.
+    TSize numSentinel = countSequences(text);
+    createCompressedSa(indexSA(index), tempSA, numSentinel);
+    std::cout << " done.\n" << std::flush;
+    return true;
+}
 
 // ============================================================================
 // Functions
@@ -264,7 +307,15 @@ void saveIndex(YaraIndexer<TSpec, TConfig> & me)
     try
     {
         // Iterator instantiation triggers index construction.
-        typename Iterator<TIndex, TopDown<> >::Type it(index);
+       typename Iterator<TIndex, TopDown<> >::Type it(index);
+       uint64_t _lastPercent = 0;
+       indexCreateProgress(index, TFullFibre(),
+                           [&_lastPercent] (uint64_t curPerc)
+                           {
+                                SEQAN_OMP_PRAGMA(critical(progressBar))
+   //                           if (TID == 0)
+                                printProgressBar(_lastPercent, curPerc);
+                            });
         ignoreUnusedVariableWarning(it);
     }
     catch (BadAlloc const & /* e */)
