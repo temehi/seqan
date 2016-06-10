@@ -118,7 +118,6 @@ struct YaraIndexer
 template <typename TText, typename TSpec, typename TConfig, typename TLambda>
 inline bool
 indexCreateProgress(Index<TText, FMIndex<TSpec, TConfig> > & index,
-                    FibreSALF const &,
                     TLambda const & progressCallback)
 {
     typedef Index<TText, FMIndex<TSpec, TConfig> >               TIndex;
@@ -308,9 +307,9 @@ void saveIndex(YaraIndexer<TSpec, TConfig> & me)
     try
     {
         // Iterator instantiation triggers index construction.
-       typename Iterator<TIndex, TopDown<> >::Type it(index);
+       // typename Iterator<TIndex, TopDown<> >::Type it(index);
        uint64_t _lastPercent = 0;
-       indexCreateProgress(index, TFullFibre(),
+       indexCreateProgress(index,
                            [&_lastPercent] (uint64_t curPerc)
                            {
                                 SEQAN_OMP_PRAGMA(critical(progressBar))
