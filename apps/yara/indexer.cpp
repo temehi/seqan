@@ -155,7 +155,7 @@ indexCreateProgress(Index<TText, FMIndex<TSpec, TConfig> > & index,
                  " (1) SuffixArray |" << std::flush;
     // Create the full SA.
     resize(tempSA, lengthSum(text), Exact());
-    createSuffixArray(tempSA, text, TAlgo(), progressCallback);
+    createSuffixArray(tempSA, text, RadixSortSACreateTag(), progressCallback);
 
     std::cout << " (2) FM-Index..." << std::flush;
     // Create the LF table.
