@@ -130,7 +130,7 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
                                      ArgParseOption::INTEGER));
 
     setMinValue(parser, "number-of-bins", "1");
-    setMaxValue(parser, "number-of-bins", "10000");
+    //setMaxValue(parser, "number-of-bins", "10000");
 
     addOption(parser, ArgParseOption("t", "threads", "Specify the number of threads to use.", ArgParseOption::INTEGER));
     setMinValue(parser, "threads", "1");
@@ -216,37 +216,39 @@ inline void build_filter(Options & options, TFilter & filter)
 {
     std::string comExt = commonExtension(options.contigsDir, options.numberOfBins);
 
-    Semaphore thread_limiter(options.threadsCount);
-    std::vector<std::future<void>> tasks;
-
     Timer<double>       timer;
     Timer<double>       globalTimer;
     start (timer);
     start (globalTimer);
 
-    for (uint32_t binNo = 0; binNo < options.numberOfBins; ++binNo)
+    uint32_t numThr = options.threadsCount;
+    uint32_t batchSize = options.numberOfBins/numThr;
+    if(batchSize * numThr < options.numberOfBins) ++batchSize;
+
+    std::vector<std::future<void>> tasks;
+
+    for (uint32_t taskNo = 0; taskNo < numThr; ++taskNo)
     {
-        tasks.emplace_back(std::async([=, &thread_limiter, &filter] {
-
-            Critical_section _(thread_limiter);
-
-            Timer<double>       binTimer;
-            start (binTimer);
-
-            CharString fastaFile;
-            appendFileName(fastaFile, options.contigsDir, binNo);
-            append(fastaFile, comExt);
-
-            filter.addFastaFile(fastaFile, binNo);
-
-            stop(binTimer);
-            if (options.verbose)
+        tasks.emplace_back(std::async([=, &filter] {
+            for (uint32_t binNo = taskNo*batchSize; binNo < options.numberOfBins && binNo < (taskNo +1) * batchSize; ++binNo)
             {
-                mtx.lock();
-                std::cerr <<"[bin " << binNo << "] Done adding kmers!\t\t\t" << binTimer << std::endl;
-                mtx.unlock();
-            }
-        }));
+                Timer<double>       binTimer;
+                start (binTimer);
+
+                CharString fastaFile;
+                appendFileName(fastaFile, options.contigsDir, binNo);
+                append(fastaFile, comExt);
+
+                filter.addFastaFile(fastaFile, binNo);
+
+                stop(binTimer);
+                if (options.verbose)
+                {
+                    mtx.lock();
+                    std::cerr <<"[bin " << binNo << "] Done adding kmers!\t\t\t" << binTimer << std::endl;
+                    mtx.unlock();
+                }
+            }}));
     }
     for (auto &&task : tasks)
     {
