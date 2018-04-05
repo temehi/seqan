@@ -238,7 +238,7 @@ void setupArgumentParser(ArgumentParser & parser, DisOptions const & disOptions)
     hideOption(getOption(parser, "reads-batch"));
 
     // Setup Distributed mapper disOptions.
-    addSection(parser, "Distributed mapper disOptions");
+    addSection(parser, "Distributed mapper Options");
 //    addOption(parser, ArgParseOption("b", "number-of-bins", "The number of bins (indices) for distributed mapper",
 //                                     ArgParseOption::INTEGER));
 //    setMinValue(parser, "number-of-bins", "1");

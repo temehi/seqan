@@ -929,9 +929,10 @@ inline void spawnDisMapper(DisOptions & disOptions,
         std::cerr << "Cigars moving time:\t\t" << disOptions.moveCigars << " sec" << "\t\t" << disOptions.moveCigars / total << " %" << std::endl;
 
         printStats(disMapper, timer);
-    }
+		std::cerr << "Avg reads per bin:\t\t" << (double)disOptions.filteredReads / disOptions.numberOfBins << std::endl;
+	}
 
-    std::cerr << "Avg reads per bin:\t\t" << (double)disOptions.filteredReads / disOptions.numberOfBins << std::endl;
+    
 
 }
 

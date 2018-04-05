@@ -130,7 +130,7 @@ void setupArgumentParser(ArgumentParser & parser, Options const & options)
                                      ArgParseOption::INTEGER));
 
     setMinValue(parser, "number-of-bins", "1");
-    //setMaxValue(parser, "number-of-bins", "10000");
+    setMaxValue(parser, "number-of-bins", "10000");
 
     addOption(parser, ArgParseOption("t", "threads", "Specify the number of threads to use.", ArgParseOption::INTEGER));
     setMinValue(parser, "threads", "1");
