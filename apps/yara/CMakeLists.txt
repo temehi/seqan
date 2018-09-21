@@ -70,6 +70,7 @@ endif (MSVC)
 # ----------------------------------------------------------------------------
 
 # Add include directories.
+include_directories (${SDSL_INCLUDE_DIRS})
 include_directories (${SEQAN_INCLUDE_DIRS})
 
 # Add definitions set by find_package (SeqAn).
@@ -92,6 +93,36 @@ add_executable(yara_indexer indexer.cpp
                             store_seqs.h
                             bits_matches.h
                             index_fm.h)
+
+add_executable(dream_yara_indexer d_indexer.cpp
+                                  misc_tags.h
+                                  misc_timer.h
+                                  misc_options.h
+                                  d_misc_options.h
+                                  misc_types.h
+                                  store_seqs.h
+                                  bits_matches.h
+                                  index_fm.h)
+
+add_executable(dream_yara_build_filter d_build_filter.cpp
+                                       misc_timer.h
+                                       misc_options.h
+                                       d_misc_options.h
+                                       misc_types.h
+                                       store_seqs.h
+                                       bits_matches.h
+                                       d_kdx_filter.h
+                                       d_bloom_filter.h)
+
+add_executable(dream_yara_update_filter d_update_filter.cpp
+                                        misc_timer.h
+                                        misc_options.h
+                                        d_misc_options.h
+                                        misc_types.h
+                                        store_seqs.h
+                                        bits_matches.h
+                                        d_kdx_filter.h
+                                        d_bloom_filter.h)
 
 add_executable(yara_mapper    mapper.cpp
                               mapper.h
@@ -121,9 +152,45 @@ add_executable(yara_mapper    mapper.cpp
                               find_verifier.h
                               index_fm.h)
 
+add_executable(dream_yara_mapper  d_mapper.cpp
+                                  d_mapper.h
+                                  mapper.h
+                                  mapper_collector.h
+                                  mapper_classifier.h
+                                  mapper_ranker.h
+                                  mapper_filter.h
+                                  mapper_extender.h
+                                  mapper_verifier.h
+                                  mapper_aligner.h
+                                  mapper_writer.h
+                                  basic_alphabet.h
+                                  file_pair.h
+                                  file_prefetched.h
+                                  store_seqs.h
+                                  misc_tags.h
+                                  misc_timer.h
+                                  misc_options.h
+                                  d_misc_options.h
+                                  d_kdx_filter.h
+                                  d_bloom_filter.h
+                                  misc_types.h
+                                  bits_reads.h
+                                  bits_hits.h
+                                  bits_matches.h
+                                  bits_context.h
+                                  bits_seeds.h
+                                  bits_bucket.h
+                                  find_extender.h
+                                  find_verifier.h
+                                  index_fm.h)
+
 # Add dependencies found by find_package (SeqAn).
 target_link_libraries (yara_indexer ${SEQAN_LIBRARIES})
+target_link_libraries (dream_yara_indexer ${SEQAN_LIBRARIES})
+target_link_libraries (dream_yara_build_filter ${SEQAN_LIBRARIES})
+target_link_libraries (dream_yara_update_filter ${SEQAN_LIBRARIES})
 target_link_libraries (yara_mapper ${SEQAN_LIBRARIES})
+target_link_libraries (dream_yara_mapper ${SEQAN_LIBRARIES})
 
 # ----------------------------------------------------------------------------
 # Installation
@@ -155,7 +222,7 @@ seqan_add_app_test (yara)
 
 # Include executable yara_mapper in CTD structure.
 set (SEQAN_CTD_EXECUTABLES ${SEQAN_CTD_EXECUTABLES}
-                           yara_indexer yara_mapper CACHE INTERNAL "")
+                           yara_indexer dream_yara_indexer dream_yara_build_filter dream_yara_update_filter yara_mapper dream_yara_mapper CACHE INTERNAL "")
 
 # ----------------------------------------------------------------------------
 # CPack Install
@@ -164,8 +231,9 @@ set (SEQAN_CTD_EXECUTABLES ${SEQAN_CTD_EXECUTABLES}
 if (SEQAN_BUILD_SYSTEM STREQUAL "APP:yara")
   set (CPACK_PACKAGE_NAME "yara")
   set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Yara - Yet Another Read Aligner")
-  set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Enrico Siragusa <enrico.siragusa@fu-berlin.de>")
+  set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Enrico Siragusa <enrico.siragusa@fu-berlin.de>, Temesgen H. Dadi <temesgen.dadi@fu-berlin.de>")
   set (CPACK_PACKAGE_VENDOR "SeqAn Team, FU Berlin")
+  set (CPACK_PACKAGE_CONTACT "${CPACK_PACKAGE_VENDOR}")
   set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.rst")
 
   seqan_configure_cpack_app (yara "yara")
